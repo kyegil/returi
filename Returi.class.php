@@ -3,7 +3,7 @@
 *****************************      RETURI     ****************************
 by Kay-Egil Hauan
 php class to provide uri history for return / back buttons in applications
-This version 2016-08-07
+This version 2017-06-14
 **************************************************************************/
 
 namespace kyegil\returi;
@@ -19,6 +19,11 @@ private $table			= RETURI_LOG_TABLE;
 public $default_uri		= RETURI_LOG_DEFAULT_URI;
 public $mysqli;
 
+
+/*	Constructor
+******************************************
+------------------------------------------
+*/
 public function __construct() {
 	global $mysqliConnection;
 	$this->mysqli = $mysqliConnection;
@@ -27,7 +32,12 @@ public function __construct() {
 	$this->clear();
 }
 
-function install() {
+
+/*	Install
+******************************************
+------------------------------------------
+*/
+public function install() {
 	$sql = "CREATE TABLE IF NOT EXISTS `" . $this->mysqli->real_escape_string($this->table) . "` (
   `id` int(11) NOT NULL auto_increment,
   `time` timestamp NOT NULL default CURRENT_TIMESTAMP,
@@ -43,13 +53,23 @@ function install() {
 	else return $this->mysqli->error;
 }
 
-function uninstall() {
+
+/*	Uninstall
+******************************************
+------------------------------------------
+*/
+public function uninstall() {
 	$sql = "DROP TABLE `" . $this->mysqli->real_escape_string($this->table) . "`;";
 	if($this->mysqli->query($sql)) return true;
 	else return $this->mysqli->error;
 }
 
-function determine_uri() {
+
+/*	Determine uri
+******************************************
+------------------------------------------
+*/
+public function determine_uri() {
 	$result = (
 		@$_SERVER["HTTPS"] == "on"
 		? "https://"
@@ -65,7 +85,12 @@ function determine_uri() {
 	return $result;
 }
 
-function determine_session() {
+
+/*	Determine session
+******************************************
+------------------------------------------
+*/
+public function determine_session() {
 	if(isset($_COOKIE[$this->cookie])) {
 		$this->session = $_COOKIE[$this->cookie];
 	}
@@ -74,7 +99,12 @@ function determine_session() {
 	}
 }
 
-function set($uri = "", $session = "") {
+
+/*	Set
+******************************************
+------------------------------------------
+*/
+public function set($uri = "", $session = "") {
 	if(!$uri) $uri = $this->determine_uri();
 	if(!$session) $session = $this->session;
 	
@@ -99,23 +129,43 @@ function set($uri = "", $session = "") {
 	return $this->mysqli->query($sql);
 }
 
-function reset($session = "") {
+
+/*	Reset
+******************************************
+------------------------------------------
+*/
+public function reset($session = "") {
 	if(!$session) $session = $this->session;
 	
 	$sql = "DELETE FROM `{$this->table}` WHERE `session` = '" . $this->mysqli->real_escape_string($session) . "'";
 	return $this->mysqli->query($sql);
 }
 
-function clear() {
+
+/*	Clear
+******************************************
+------------------------------------------
+*/
+public function clear() {
 	$sql = "DELETE FROM `{$this->table}` WHERE `time` < DATE_SUB(NOW(), INTERVAL {$this->expiry})";
 	return $this->mysqli->query($sql);
 }
 
-function truncate() {
+
+/*	Truncate
+******************************************
+------------------------------------------
+*/
+public function truncate() {
 	return $this->mysqli->query("TRUNCATE `{$this->table}`");
 }
 
-function get($skip = 0, $uri = "", $session = "") {
+
+/*	Get
+******************************************
+------------------------------------------
+*/
+public function get($skip = 0, $uri = "", $session = "") {
 	if(!$uri) $uri = $this->determine_uri();
 	if(!$session) $session = $this->session;
 	
